@@ -1,0 +1,4 @@
+.env
+test.py
+music_test.py
+cogs/__pycache__
