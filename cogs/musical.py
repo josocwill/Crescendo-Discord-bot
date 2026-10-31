@@ -12,7 +12,7 @@ QUOTES = open("assets/creation.txt", "r").readlines()
 ERRORLINES = open("assets/errorlines.txt", "r").readlines()
 
 def getnum(num:str) -> float:
-
+    if num == "": return 1
     if "/" in num:
         if num.count("/") > 1:
             return -2.0
@@ -648,13 +648,12 @@ def generate(tune:str, bpm:str, g=1.0, w=[1.0, 0.0, 0.0, 0.0]):
                     phase = "modifiers"
 
                 elif tune[c] == "R":
-                    song += [Silence(currentnote["duration"]*60000/currentnote["t"])]
+                    song += [Silence(getnum(currentnum)*60000/currentnote["t"])]
                     c += 1
                     if tune[c] != " ":
                         return (False, "## " + formaterr("a space was expected after a rest"), c) # ERROR! Unexpected character after rest
                     currentnum = ""
                     currentnote = modifiers.copy()
-                    c += 1
 
                 elif tune[c] == "f": phase = "freq"
 
