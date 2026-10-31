@@ -1,4 +1,3 @@
 .env
-test.py
-music_test.py
+*test.*
 cogs/__pycache__
