@@ -38,11 +38,15 @@ class Musical(commands.Cog):
     @discord.slash_command(
         name="tune",
         description="Create a tune."
+
     )
     async def tune(self, ctx, tune, bpm="120"):
         global songid, queue
         songid += 1
         currentid = songid
+
+        if len(tune) > 1800:
+            await ctx.respond("Tune is too long, please send it again as a file using the `/filetune` command")
         
         t = time()
         await ctx.respond(f"""# {tune}
@@ -75,7 +79,52 @@ class Musical(commands.Cog):
 -# Tunes generated since last offline: **{songid-1}**
 -# Generation time: **`{round(t*1000)} ms`**""", file=discord.File(f"tempmusic\\{currentid}.wav", "result.wav", description="This awesome tune was generated using crescendo bot by WillEnd."))
             remove(f"tempmusic\\{currentid}.wav")
+        return None
 
+    @discord.slash_command(
+        name="filetune",
+        description="Create a tune from a file"
+    )
+    async def filetune(self, ctx, tunefile: discord.Attachment, bpm="120"):
+        global songid, queue
+        songid += 1
+        currentid = songid
+        
+        btune = await tunefile.read()
+        tune = btune.decode()
+        
+        t = time()
+        await ctx.respond(f"""# *{tunefile.url}*
+        ~~--------------------~~
+-# BPM: **{bpm}**
+-# Tunes generated since last offline: **{songid-1}**
+-# Generation time: **`----- ms`**
+        
+## *{choice(QUOTES)[:-1]}*""")
+        
+        res = generate(tune, bpm)
+        t = time() - t
+        
+        if res[0] == False:
+            await ctx.edit(content=f"""# *{tunefile.url}*
+~~--------------------~~
+-# BPM: **{bpm}**
+-# Tunes generated since last offline: **{songid-1}**
+-# Generation time: **`{round(t*1000)} ms`**
+        {res[1]}
+        ```diff
+        {tune}
+        -{'~'*res[2]}^```""")
+        
+        else:
+            res[1].export(f"tempmusic\\{currentid}.wav")
+            await ctx.edit(content=f"""# *{tunefile.url}*
+~~--------------------~~
+-# BPM: **{bpm}**
+-# Tunes generated since last offline: **{songid-1}**
+-# Generation time: **`{round(t*1000)} ms`**""", file=discord.File(f"tempmusic\\{currentid}.wav", "result.wav", description="This awesome tune was generated using crescendo bot by WillEnd."))
+            remove(f"tempmusic\\{currentid}.wav")
+        return None
 
 def setup(bot):
     bot.add_cog(Musical(bot))
