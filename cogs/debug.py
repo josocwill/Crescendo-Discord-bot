@@ -13,6 +13,5 @@ class Debug(commands.Cog):
     async def ping(self, ctx):
         await ctx.respond(f"Pong! Latency is {self.bot.latency} s")
 
-
-def setup(bot):
+def setup(bot:discord.Bot):
     bot.add_cog(Debug(bot))

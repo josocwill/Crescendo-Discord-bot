@@ -103,26 +103,45 @@ class Musical(commands.Cog):
 ## *{choice(QUOTES)[:-1]}*""")
         
         res = generate(tune, bpm)
-        t = time() - t
         
         if res[0] == False:
+            t = time() - t
+            if len(tune) < 9:
+                cont = tune
+            elif res[2] < 4:
+                cont = tune[:9] + "..."
+            elif res[2] > len(tune) - 4:
+                cont = "..." + tune[-9:]
+            else:
+                cont = "..." + tune[res[2]-4:res[2]+5] + "..."
             await ctx.edit(content=f"""# *{tunefile.url}*
 ~~--------------------~~
 -# BPM: **{bpm}**
 -# Tunes generated since last offline: **{songid-1}**
 -# Generation time: **`{round(t*1000)} ms`**
-        {res[1]}
-        ```diff
-        {tune}
-        -{'~'*res[2]}^```""")
+{res[1]}
+```diff
+Oh no! An error was found at character {res[2]}!
+- {cont}
+```""")
         
         else:
             res[1].export(f"tempmusic\\{currentid}.wav")
-            await ctx.edit(content=f"""# *{tunefile.url}*
+            t = time() - t
+            try:
+                await ctx.edit(content=f"""# *{tunefile.url}*
 ~~--------------------~~
 -# BPM: **{bpm}**
 -# Tunes generated since last offline: **{songid-1}**
 -# Generation time: **`{round(t*1000)} ms`**""", file=discord.File(f"tempmusic\\{currentid}.wav", "result.wav", description="This awesome tune was generated using crescendo bot by WillEnd."))
+            except discord.errors.HTTPException:
+                print("Big file!")
+                await ctx.edit(content=f"""# *{tunefile.url}*
+~~--------------------~~
+-# BPM: **{bpm}**
+-# Tunes generated since last offline: **{songid-1}**
+-# Generation time: **`{round(t*1000)} ms`**
+## Oh no! There was an HTTP error! Maybe the file was too big?""")
             remove(f"tempmusic\\{currentid}.wav")
         return None
 
